@@ -39,17 +39,17 @@ public class BatchConfig {
                 .build();
     }
 
-    @Bean(name="demoJobOne")
+    @Bean(name="BatchJobOne")
     public Job demoJobOne(){
-        return jobBuilderFactory.get("demoJobOne")
+        return jobBuilderFactory.get("BatchJobOne")
                 .start(stepOne())
                 .next(stepTwo())
                 .build();
     }
 
-    @Bean(name="demoJobTwo")
+    @Bean(name="BatchJobTwo")
     public Job demoJobTwo(){
-        return jobBuilderFactory.get("demoJobTwo")
+        return jobBuilderFactory.get("BatchJobTwo")
                 .flow(stepOne())
                 .build()
                 .build();
