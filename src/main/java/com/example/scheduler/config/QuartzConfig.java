@@ -4,11 +4,14 @@ import com.example.scheduler.entity.JobRequest;
 import com.example.scheduler.jobs.BatchJobLauncher;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
+import org.quartz.spi.JobFactory;
+import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
+import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
@@ -68,6 +72,24 @@ public class QuartzConfig {
                 .build();
     }
 
+    /**
+     * Quartz Schedule Job 에 의존성 주입
+     *
+     * @param beanFactory application context beanFactory
+     * @return the job factory
+     */
+    @Bean
+    public JobFactory jobFactory(AutowireCapableBeanFactory beanFactory) {
+        return new SpringBeanJobFactory(){
+            @Override
+            protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
+                Object job = super.createJobInstance(bundle);
+                beanFactory.autowireBean(job);
+                return job;
+            }
+        };
+    }
+
     @Bean
     public JobDetail jobTwoDetail() {
         //Set Job data map
@@ -84,7 +106,7 @@ public class QuartzConfig {
     }
 
 
-    public static Trigger createTrigger(JobRequest jobRequest) {
+    public Trigger createTrigger(JobRequest jobRequest) {
         String cronExpression = jobRequest.getCronExpression();
         LocalDateTime startDateAt = jobRequest.getStartDateAt();
 
@@ -98,7 +120,7 @@ public class QuartzConfig {
         throw new IllegalStateException("unsupported trigger descriptor");
     }
 
-    private static Trigger createCronTrigger(JobRequest jobRequest) {
+    private Trigger createCronTrigger(JobRequest jobRequest) {
         CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();
         factoryBean.setName(jobRequest.getJobName());
         factoryBean.setGroup(jobRequest.getJobGroup());
@@ -106,7 +128,7 @@ public class QuartzConfig {
         factoryBean.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
         // hhk.Batch Job 추가.
-        factoryBean.setJobDetail();// @to-do : jobName -> JobDetail
+        factoryBean.setJobDetail(jobOneDetail());// @to-do : jobName -> JobDetail
 
         try {
             factoryBean.afterPropertiesSet();
@@ -116,7 +138,7 @@ public class QuartzConfig {
         return factoryBean.getObject();
     }
 
-    private static Trigger createSimpleTrigger(JobRequest jobRequest) {
+    private Trigger createSimpleTrigger(JobRequest jobRequest) {
         SimpleTriggerFactoryBean factoryBean = new SimpleTriggerFactoryBean();
         factoryBean.setName(jobRequest.getJobName());
         factoryBean.setGroup(jobRequest.getJobGroup());
@@ -126,7 +148,7 @@ public class QuartzConfig {
         factoryBean.setRepeatCount(jobRequest.getRepeatCount());
 
         // hhk.Batch Job 추가.
-        factoryBean.setJobDetail(); // @to-do : jobName -> JobDetail
+        factoryBean.setJobDetail(jobOneDetail()); // @to-do : jobName -> JobDetail
 
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();

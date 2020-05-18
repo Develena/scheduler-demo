@@ -71,30 +71,20 @@ public class SchedleServiceImpl implements ScheduleService{
 
     @Override
     public String testJobs() {
-        CronTriggerFactoryBean ctFactory = new CronTriggerFactoryBean();
-        ctFactory.setStartDelay(1000); // after 10s
-        ctFactory.setName("demoJobOne");
-        ctFactory.setGroup("cron_group");
-        ctFactory.setCronExpression("0 0/1 * 1/1 * ? *");
-        ctFactory.setJobDetail(config.jobOneDetail());
 
-        ctFactory.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
-        try {
-            ctFactory.afterPropertiesSet();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        JobRequest jobRequest = new JobRequest();
+        jobRequest.setJobName("BatchOneJob");
+        jobRequest.setCronExpression("0 0/1 * 1/1 * ? *");
+
+        Trigger trigger = config.createTrigger(jobRequest);
 
         try {
-            if(schedulerFactoryBean.getScheduler().checkExists(config.jobOneDetail().getKey())){
-                log.info("### jobkey {} is already exists.",config.jobOneDetail().getKey());
-                Date dt = schedulerFactoryBean.getScheduler().scheduleJob(ctFactory.getObject());
+            if(schedulerFactoryBean.getScheduler().checkExists(jobOneDetail.getKey())){
+                log.info("### jobkey {} is already exists.",jobOneDetail.getKey());
+                Date dt = schedulerFactoryBean.getScheduler().scheduleJob(trigger);
                 log.info("### Job with jobKey : {} scheduled successfully at date : {}", jobOneDetail.getKey(), dt);
                 return "already";
             }
-
-            Date dt = schedulerFactoryBean.getScheduler().scheduleJob(config.jobOneDetail(), ctFactory.getObject());
-            log.info("### Job with jobKey : {} scheduled successfully at date : {}", jobOneDetail.getKey(), dt);
         } catch (SchedulerException e) {
             e.printStackTrace();
         }

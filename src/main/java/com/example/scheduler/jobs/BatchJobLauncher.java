@@ -18,7 +18,14 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  * Create Quartz Job : QuartzJobBean 이 Spring Batch Job을 Launch.
  */
 @Slf4j
-public class BatchJobLauncher  extends QuartzJobBean {
+public class BatchJobLauncher extends QuartzJobBean {
+
+//    @Autowired
+//    private JobLocator jobLocator;
+//
+//    @Autowired
+//    private JobLauncher jobLauncher;
+
 
     @Getter
     @Setter
@@ -53,4 +60,18 @@ public class BatchJobLauncher  extends QuartzJobBean {
             e.printStackTrace();
         }
     }
+
+//    @Override
+//    public void execute(JobExecutionContext context) throws JobExecutionException {
+//        try {
+//            String jobName = BatchHelper.getJobName(context.getMergedJobDataMap());
+//            log.info("[{}] started.", jobName);
+//            JobParameters jobParameters = BatchHelper.getJobParameters(context);
+//            jobLauncher.run(jobLocator.getJob(jobName), jobParameters);
+//            log.info("[{}] completed.", jobName);
+//        } catch (NoSuchJobException | JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | SchedulerException e) {
+//            log.error("job execution exception! - {}", e.getCause());
+//            throw new JobExecutionException();
+//        }
+//    }
 }
