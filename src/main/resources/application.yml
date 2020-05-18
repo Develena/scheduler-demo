@@ -1,0 +1,17 @@
+
+spring:
+  profiles:
+    active: local
+
+---
+spring:
+  profiles: local
+  batch:
+    job:
+      enabled: false # Disable batch Job's auto start
+  h2:
+    console:
+      enabled: true # enable h2 database console
+      path: /h2
+
+
