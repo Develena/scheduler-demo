@@ -13,7 +13,7 @@ public interface ScheduleService {
 
     boolean isJobExists(JobKey jobKey);
 
-    boolean addJob(JobRequest jobRequest, Class<? extends Job> jobClass);
+    boolean addJob(JobRequest jobRequest);
 
     boolean deleteJob(JobKey jobKey);
 
@@ -23,6 +23,6 @@ public interface ScheduleService {
 
     String getJobState(JobKey jobKey);
 
-    String testJobs();
+//    boolean testJobs();
 
 }

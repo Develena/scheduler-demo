@@ -7,7 +7,6 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,10 +14,16 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Create Spring Batch Jobs : Spring Batch Job을 정의.
+ * 1. Job 설정, 2. Step 설정, 3. Reader, Processor, Writer 설정
+ * - 자체 CronExpression을 정의하는 경우.
  */
 @Configuration
 @EnableBatchProcessing
-public class BatchConfig {
+public class SampleBatchJob {
+
+    public static final String JOB_NAME = "SampleBatchJob";
+    public static final String JOBDETAIL_NAME = "SampleBatchJobDetail";
+    public static final String JOB_GROUP = "SampleGroup";
 
     @Autowired
     public JobBuilderFactory jobBuilderFactory;
@@ -39,22 +44,21 @@ public class BatchConfig {
                 .build();
     }
 
-    @Bean(name="BatchJobOne")
-    public Job demoJobOne(){
-        return jobBuilderFactory.get("BatchJobOne")
+    @Bean(name=JOB_NAME)
+    public Job sampleBatchJob(){
+        return jobBuilderFactory.get(JOB_NAME)
                 .start(stepOne())
                 .next(stepTwo())
                 .build();
     }
 
-    @Bean(name="BatchJobTwo")
-    public Job demoJobTwo(){
-        return jobBuilderFactory.get("BatchJobTwo")
-                .flow(stepOne())
-                .build()
-                .build();
-    }
-
+//    @Bean(name="BatchJobTwo")
+//    public Job demoJobTwo(){
+//        return jobBuilderFactory.get("BatchJobTwo")
+//                .flow(stepOne())
+//                .build()
+//                .build();
+//    }
 
 
 }

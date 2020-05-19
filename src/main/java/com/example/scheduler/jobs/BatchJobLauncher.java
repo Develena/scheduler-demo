@@ -20,13 +20,6 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 @Slf4j
 public class BatchJobLauncher extends QuartzJobBean {
 
-//    @Autowired
-//    private JobLocator jobLocator;
-//
-//    @Autowired
-//    private JobLauncher jobLauncher;
-
-
     @Getter
     @Setter
     private String jobName;
@@ -39,6 +32,8 @@ public class BatchJobLauncher extends QuartzJobBean {
     @Setter
     private JobLocator jobLocator;
 
+    private volatile Thread currThread;
+
 
     // execute job
     // 1. in this case, only one parameter reference :  Job Name.
@@ -46,6 +41,9 @@ public class BatchJobLauncher extends QuartzJobBean {
     // 3. JobLauncher를 통해 해당 Job을 실행함.
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+
+        currThread = Thread.currentThread();
+
         try
         {
             Job job = jobLocator.getJob(jobName);
@@ -54,6 +52,7 @@ public class BatchJobLauncher extends QuartzJobBean {
                     .toJobParameters();
             JobExecution jobExecution = jobLauncher.run(job, params);
             log.info("### {}_{} was completed successfully", job.getName(), jobExecution.getId());
+            log.info("### Current Thread : {}", currThread.getName());
         }
         catch (Exception e) {
             log.error("Encountered job execution exception!");
@@ -61,17 +60,4 @@ public class BatchJobLauncher extends QuartzJobBean {
         }
     }
 
-//    @Override
-//    public void execute(JobExecutionContext context) throws JobExecutionException {
-//        try {
-//            String jobName = BatchHelper.getJobName(context.getMergedJobDataMap());
-//            log.info("[{}] started.", jobName);
-//            JobParameters jobParameters = BatchHelper.getJobParameters(context);
-//            jobLauncher.run(jobLocator.getJob(jobName), jobParameters);
-//            log.info("[{}] completed.", jobName);
-//        } catch (NoSuchJobException | JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | SchedulerException e) {
-//            log.error("job execution exception! - {}", e.getCause());
-//            throw new JobExecutionException();
-//        }
-//    }
 }
